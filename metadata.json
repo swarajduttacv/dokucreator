@@ -1,0 +1,5 @@
+{
+  "name": "DokuCreator",
+  "description": "An intelligent application that analyzes user-provided data to generate charts, slides, and reports. Features user authentication and local storage to save and manage your creations.",
+  "requestFramePermissions": []
+}

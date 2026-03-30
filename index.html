@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DokuCreator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class', // Enable class-based dark mode
+        theme: {
+          extend: {
+            colors: {
+              'brand-primary': '#3E2723', // Deep Chocolate Brown
+              'brand-secondary': '#5D4037', // Lighter Brown
+              'brand-background': '#F5F2E9', // Beige
+              'brand-text': '#1B0000', // Near-black for contrast
+              'brand-surface': '#ffffff', // White for cards
+              'brand-subtle': '#D7CCC8', // Subtle border color
+
+              // New Dark Theme Palette
+              'dark-primary': '#A1887F', // Lighter brown for accents
+              'dark-secondary': '#D7CCC8', // Lightest beige for secondary text/headings
+              'dark-background': '#211e1b', // Very dark, warm brown
+              'dark-text': '#F5F2E9', // Light beige (from light theme background)
+              'dark-surface': '#3E2723', // Primary brand color for cards/surfaces
+              'dark-subtle': '#5D4037', // Secondary brand color for borders
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.5s ease-in-out',
+              'slide-in-up': 'slideInUp 0.5s ease-in-out',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              slideInUp: {
+                '0%': { transform: 'translateY(20px)', opacity: '0' },
+                '100%': { transform: 'translateY(0)', opacity: '1' },
+              },
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      /* Themed Scrollbars */
+      ::-webkit-scrollbar {
+        width: 12px;
+        height: 12px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #F5F2E9; /* brand-background */
+      }
+      ::-webkit-scrollbar-thumb {
+        background-color: #D7CCC8; /* brand-subtle */
+        border-radius: 20px;
+        border: 3px solid #F5F2E9; /* brand-background */
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background-color: #5D4037; /* brand-secondary */
+      }
+      /* Dark Mode Scrollbars */
+      .dark ::-webkit-scrollbar-track {
+        background: #211e1b; /* dark-background */
+      }
+      .dark ::-webkit-scrollbar-thumb {
+        background-color: #5D4037; /* dark-subtle */
+        border-color: #211e1b; /* dark-background */
+      }
+      .dark ::-webkit-scrollbar-thumb:hover {
+        background-color: #A1887F; /* dark-primary */
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.28.0",
+    "recharts": "https://aistudiocdn.com/recharts@^3.3.0",
+    "html-to-image": "https://aistudiocdn.com/html-to-image@^1.11.13"
+  }
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-brand-background text-brand-text dark:bg-dark-background dark:text-dark-text transition-colors duration-300">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
