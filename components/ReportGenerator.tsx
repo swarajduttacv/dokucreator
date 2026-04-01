@@ -137,19 +137,21 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ loadedReport, onSave,
 
         const { jsPDF } = jspdf;
         const pdf = new jsPDF('p', 'pt', 'a4');
+        const pdfPageWidth = pdf.internal.pageSize.getWidth();
+        const margin = 40;
+        const contentWidth = pdfPageWidth - margin * 2;
+        const sourceWidth = reportPreviewRef.current.offsetWidth;
 
         pdf.html(reportPreviewRef.current, {
             callback: function (doc: any) {
                 doc.save('report.pdf');
             },
-            x: 40,
-            y: 40,
-            margin: [40, 40, 40, 40],
+            margin: [margin, margin, margin, margin],
             autoPaging: 'text',
-            width: 515,
-            windowWidth: reportPreviewRef.current.scrollWidth,
+            width: contentWidth,
+            windowWidth: sourceWidth,
             html2canvas: {
-                scale: 0.5,
+                scale: 0.75,
                 logging: false,
                 useCORS: true,
             },
