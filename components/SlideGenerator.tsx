@@ -225,7 +225,7 @@ const SlideGenerator: React.FC<SlideGeneratorProps> = ({ selectedChart, loadedSl
       if (themedChartForGen && hiddenChartRef.current && downloadQueueItem.current) {
           const slideDataForDownload = downloadQueueItem.current;
 
-          toPng(hiddenChartRef.current, { quality: 0.95, backgroundColor: themedChartForGen.customTheme!.background })
+          toPng(hiddenChartRef.current, { quality: 0.95, backgroundColor: themedChartForGen.customTheme!.background, style: { borderRadius: '0', overflow: 'visible' }, pixelRatio: 2 })
               .then(dataUrl => {
                   const imageBase64 = dataUrl.split(',')[1];
                   return createSlide({
@@ -439,9 +439,9 @@ const SlideGenerator: React.FC<SlideGeneratorProps> = ({ selectedChart, loadedSl
 
         {/* Hidden renderer for generating chart images */}
         {themedChartForGen && (
-            <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
-                <div ref={hiddenChartRef} style={{ width: '960px', height: '540px' }}>
-                    <ChartRenderer chart={themedChartForGen} width={960} height={540} />
+            <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', overflow: 'visible' }}>
+                <div ref={hiddenChartRef} style={{ width: '960px', height: '540px', overflow: 'visible', borderRadius: '0', padding: '10px' }}>
+                    <ChartRenderer chart={themedChartForGen} width={940} height={520} />
                 </div>
             </div>
         )}
