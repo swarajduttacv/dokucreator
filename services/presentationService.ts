@@ -89,7 +89,6 @@ export const createSlide = async (options: SlideOptions): Promise<void> => {
               y: 1.15,
               w: 4.5,
               h: 4.0,
-              rounding: true,
           });
 
       } else {

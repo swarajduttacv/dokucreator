@@ -126,21 +126,44 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ loadedReport, onSave,
         document.body.removeChild(fileDownload);
     };
 
-    const handleDownloadPdf = () => {
+    const handleDownloadPdf = async () => {
         if (!reportPreviewRef.current) return;
-
-        const { jsPDF } = jspdf;
-        const pdf = new jsPDF('p', 'pt', 'a4');
         
-        pdf.html(reportPreviewRef.current, {
-            callback: function (doc: any) {
-                doc.save('report.pdf');
-            },
-            margin: [40, 40, 40, 40],
-            autoPaging: 'text',
-            width: 515,
-            windowWidth: reportPreviewRef.current.scrollWidth,
+        const html2canvas = (await import('html2canvas')).default;
+        const { jsPDF } = jspdf;
+        
+        const element = reportPreviewRef.current;
+        const canvas = await html2canvas(element, {
+            scale: 2, // 2x resolution for sharp zoom
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff',
         });
+        
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'pt', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const margin = 30;
+        const contentWidth = pdfWidth - margin * 2;
+        const imgHeight = (canvas.height * contentWidth) / canvas.width;
+        
+        let heightLeft = imgHeight;
+        let position = margin;
+        
+        // First page
+        pdf.addImage(imgData, 'PNG', margin, position, contentWidth, imgHeight);
+        heightLeft -= (pdfHeight - margin * 2);
+        
+        // Additional pages
+        while (heightLeft > 0) {
+            position = position - (pdfHeight - margin * 2);
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', margin, position, contentWidth, imgHeight);
+            heightLeft -= (pdfHeight - margin * 2);
+        }
+        
+        pdf.save('report.pdf');
     };
 
     return (
