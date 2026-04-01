@@ -133,52 +133,26 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ loadedReport, onSave,
     };
 
     const handleDownloadPdf = () => {
-        if (!reportPreviewRef.current || !generatedHtml) return;
+        if (!reportPreviewRef.current) return;
 
         const { jsPDF } = jspdf;
         const pdf = new jsPDF('p', 'pt', 'a4');
-        
-        // Sanitize HTML for jsPDF: replace gradients with solid colors, ensure text visibility
-        const container = document.createElement('div');
-        container.innerHTML = generatedHtml;
-        container.style.width = '515px';
-        container.style.fontFamily = 'Inter, Arial, sans-serif';
-        container.style.color = '#1a1a2e';
-        container.style.lineHeight = '1.8';
-        container.style.padding = '20px';
-        container.style.backgroundColor = '#ffffff';
-        
-        // Force solid backgrounds and visible text on all styled elements
-        const allElements = container.querySelectorAll('*');
-        allElements.forEach((el: any) => {
-            const style = el.style;
-            const computedBg = style.background || style.backgroundColor || '';
-            // Replace any gradient with solid fallback
-            if (computedBg.includes('gradient')) {
-                style.background = 'none';
-                style.backgroundColor = '#e8f0fe';
-            }
-            // Ensure text is visible inside colored containers
-            if (el.classList?.contains('callout') || el.classList?.contains('metric-box')) {
-                style.color = style.color || '#1a1a2e';
-                style.backgroundColor = style.backgroundColor || '#e8f0fe';
-            }
-        });
-        
-        // Temporarily add to DOM for rendering
-        container.style.position = 'absolute';
-        container.style.left = '-9999px';
-        document.body.appendChild(container);
-        
-        pdf.html(container, {
+
+        pdf.html(reportPreviewRef.current, {
             callback: function (doc: any) {
-                document.body.removeChild(container);
                 doc.save('report.pdf');
             },
+            x: 40,
+            y: 40,
             margin: [40, 40, 40, 40],
             autoPaging: 'text',
             width: 515,
-            windowWidth: 515,
+            windowWidth: reportPreviewRef.current.scrollWidth,
+            html2canvas: {
+                scale: 0.5,
+                logging: false,
+                useCORS: true,
+            },
         });
     };
 
