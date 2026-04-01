@@ -99,12 +99,13 @@ export const generateReportContent = async (
   details: string,
   components: string[],
   pageCount: number,
-  reportStyle?: string
+  reportStyle?: string,
+  aiModel?: string
 ): Promise<string> => {
   const res = await fetch(`${API_BASE}/generate/reports`, {
     method: 'POST',
     headers: getAuthHeaders(),
-    body: JSON.stringify({ details, components, pageCount, reportStyle }),
+    body: JSON.stringify({ details, components, pageCount, reportStyle, aiModel }),
   });
   const data = await handleResponse(res);
   return data.html;

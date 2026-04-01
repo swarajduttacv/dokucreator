@@ -34,6 +34,11 @@ const REPORT_STYLES = [
   { value: 'Technical', label: '⚙️ Technical' },
 ];
 
+const AI_MODELS = [
+  { value: 'gemini', label: '🤖 Gemini 3 Flash' },
+  { value: 'groq', label: '⚡ Groq (Llama 3.3 70B)' },
+];
+
 interface ReportGeneratorProps {
   loadedReport: SavedReport | null;
   onSave: (reportData: Omit<SavedReport, 'id' | 'name' | 'createdAt'>) => void;
@@ -45,6 +50,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ loadedReport, onSave,
     const [pageCount, setPageCount] = useState<number>(5);
     const [selectedComponents, setSelectedComponents] = useState(initialComponents);
     const [reportStyle, setReportStyle] = useState('Business Executive');
+    const [aiModel, setAiModel] = useState('gemini');
     const [isLoading, setIsLoading] = useState(false);
     const [generatedHtml, setGeneratedHtml] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -91,7 +97,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ loadedReport, onSave,
         setError(null);
         setGeneratedHtml(null);
         try {
-            const result = await generateReportContent(reportDetails, componentsToGenerate, pageCount, reportStyle);
+            const result = await generateReportContent(reportDetails, componentsToGenerate, pageCount, reportStyle, aiModel);
             setGeneratedHtml(result);
         } catch (e: any) {
             console.error(e);
@@ -99,7 +105,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ loadedReport, onSave,
         } finally {
             setIsLoading(false);
         }
-    }, [reportDetails, selectedComponents, pageCount, reportStyle]);
+    }, [reportDetails, selectedComponents, pageCount, reportStyle, aiModel]);
 
     const handleSaveClick = () => {
         if (!generatedHtml) {
@@ -126,44 +132,54 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ loadedReport, onSave,
         document.body.removeChild(fileDownload);
     };
 
-    const handleDownloadPdf = async () => {
-        if (!reportPreviewRef.current) return;
-        
-        const html2canvas = (await import('html2canvas')).default;
+    const handleDownloadPdf = () => {
+        if (!reportPreviewRef.current || !generatedHtml) return;
+
         const { jsPDF } = jspdf;
+        const pdf = new jsPDF('p', 'pt', 'a4');
         
-        const element = reportPreviewRef.current;
-        const canvas = await html2canvas(element, {
-            scale: 2, // 2x resolution for sharp zoom
-            useCORS: true,
-            logging: false,
-            backgroundColor: '#ffffff',
+        // Sanitize HTML for jsPDF: replace gradients with solid colors, ensure text visibility
+        const container = document.createElement('div');
+        container.innerHTML = generatedHtml;
+        container.style.width = '515px';
+        container.style.fontFamily = 'Inter, Arial, sans-serif';
+        container.style.color = '#1a1a2e';
+        container.style.lineHeight = '1.8';
+        container.style.padding = '20px';
+        container.style.backgroundColor = '#ffffff';
+        
+        // Force solid backgrounds and visible text on all styled elements
+        const allElements = container.querySelectorAll('*');
+        allElements.forEach((el: any) => {
+            const style = el.style;
+            const computedBg = style.background || style.backgroundColor || '';
+            // Replace any gradient with solid fallback
+            if (computedBg.includes('gradient')) {
+                style.background = 'none';
+                style.backgroundColor = '#e8f0fe';
+            }
+            // Ensure text is visible inside colored containers
+            if (el.classList?.contains('callout') || el.classList?.contains('metric-box')) {
+                style.color = style.color || '#1a1a2e';
+                style.backgroundColor = style.backgroundColor || '#e8f0fe';
+            }
         });
         
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'pt', 'a4');
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const margin = 30;
-        const contentWidth = pdfWidth - margin * 2;
-        const imgHeight = (canvas.height * contentWidth) / canvas.width;
+        // Temporarily add to DOM for rendering
+        container.style.position = 'absolute';
+        container.style.left = '-9999px';
+        document.body.appendChild(container);
         
-        let heightLeft = imgHeight;
-        let position = margin;
-        
-        // First page
-        pdf.addImage(imgData, 'PNG', margin, position, contentWidth, imgHeight);
-        heightLeft -= (pdfHeight - margin * 2);
-        
-        // Additional pages
-        while (heightLeft > 0) {
-            position = position - (pdfHeight - margin * 2);
-            pdf.addPage();
-            pdf.addImage(imgData, 'PNG', margin, position, contentWidth, imgHeight);
-            heightLeft -= (pdfHeight - margin * 2);
-        }
-        
-        pdf.save('report.pdf');
+        pdf.html(container, {
+            callback: function (doc: any) {
+                document.body.removeChild(container);
+                doc.save('report.pdf');
+            },
+            margin: [40, 40, 40, 40],
+            autoPaging: 'text',
+            width: 515,
+            windowWidth: 515,
+        });
     };
 
     return (
@@ -203,8 +219,8 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ loadedReport, onSave,
                         </div>
                     </div>
 
-                    {/* Page Count + Report Style */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {/* Page Count + Report Style + AI Model */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                         <div>
                             <label htmlFor="page-count" className="block text-sm font-medium text-brand-text/80 dark:text-dark-text/80 mb-2">
                                 Target Page Count: <span className="font-bold text-brand-primary dark:text-dark-primary">{pageCount}</span>
@@ -252,6 +268,25 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ loadedReport, onSave,
                             </select>
                             <p className="text-xs text-brand-text/60 dark:text-dark-text/60 mt-1">
                                 Changes tone, formatting, and level of detail.
+                            </p>
+                        </div>
+                        <div>
+                            <label htmlFor="ai-model" className="block text-sm font-medium text-brand-text/80 dark:text-dark-text/80 mb-2">
+                                AI Model
+                            </label>
+                            <select
+                                id="ai-model"
+                                value={aiModel}
+                                onChange={(e) => setAiModel(e.target.value)}
+                                className="w-full p-2.5 bg-brand-background/50 dark:bg-dark-background/50 border border-brand-subtle dark:border-dark-subtle rounded-md focus:ring-2 focus:ring-brand-primary dark:focus:ring-dark-primary focus:border-brand-primary dark:focus:border-dark-primary text-brand-text dark:text-dark-text"
+                                disabled={isLoading}
+                            >
+                                {AI_MODELS.map(m => (
+                                    <option key={m.value} value={m.value}>{m.label}</option>
+                                ))}
+                            </select>
+                            <p className="text-xs text-brand-text/60 dark:text-dark-text/60 mt-1">
+                                Select which AI to generate the report.
                             </p>
                         </div>
                     </div>
