@@ -10,7 +10,7 @@
 [![Gemini](https://img.shields.io/badge/Gemini_AI-powered-4285F4?logo=google&logoColor=white)](https://ai.google.dev)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-[live demo](#) · [backend repo](https://github.com/swarajduttacv/dokucreator-backend) · [report bug](https://github.com/swarajduttacv/dokucreator/issues)
+[live demo]([#](https://dokucreator.vercel.app) · [backend repo](https://github.com/swarajduttacv/dokucreator-backend) · [report bug](https://github.com/swarajduttacv/dokucreator/issues)
 
 </div>
 
