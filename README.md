@@ -1,5 +1,5 @@
 <div align="center">
-<img width="1200" height="400" alt="dokucreator banner" src="./assets/banner.png" />
+<img width="1200" height="400" alt="dokucreator banner" src="./assets/banner_dokucreator_17809874203791.png" />
 
 # dokucreator
 
